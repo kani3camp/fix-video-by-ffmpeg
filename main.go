@@ -60,13 +60,12 @@ func main() {
 		cmd := exec.Command("ffmpeg", "-i", m2tsFile, "-c", "copy", outputFilePath)
 
 		// ffmpegコマンドを実行して出力を取得
-		out, err := cmd.Output()
+		out, err := cmd.CombinedOutput() // 標準出力と標準エラーを一緒に取得
 		if err != nil {
 			fmt.Printf("Error processing file %s: %v\n", m2tsFile, err)
-			fmt.Printf("Output:\n%s\n", string(out))
-		} else {
-			fmt.Printf("Successfully processed file: %s -> %s\n", m2tsFile, outputFilePath)
 		}
+		// 成功しても失敗しても出力を表示する
+		fmt.Printf("Output for file %s:\n%s\n", m2tsFile, string(out))
 	}
 
 	// 終了前にユーザーにキー入力を待つ
