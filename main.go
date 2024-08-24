@@ -36,6 +36,7 @@ func main() {
 	// .m2tsファイルが見つかったか確認
 	if len(m2tsFiles) == 0 {
 		fmt.Println("No .m2ts files found in the current directory.")
+		return
 	} else {
 		fmt.Println(".m2ts files found:")
 		for _, file := range m2tsFiles {
@@ -43,17 +44,28 @@ func main() {
 		}
 	}
 
+	// outputディレクトリが存在するかチェックし、存在しない場合は作成する
+	outputDirPath := filepath.Join(currentDir, OutputDirName)
+	if _, err := os.Stat(outputDirPath); os.IsNotExist(err) {
+		fmt.Printf("Creating output directory: %s\n", outputDirPath)
+		err = os.Mkdir(outputDirPath, os.ModePerm)
+		if err != nil {
+			log.Fatalf("Failed to create output directory: %v", err)
+		}
+	}
+
 	// 各.m2tsファイルに対してffmpegコマンドを実行
 	for _, m2tsFile := range m2tsFiles {
-		fmt.Println(m2tsFile)
-		cmd := exec.Command("ffmpeg", "-i", m2tsFile, "-c", "copy", OutputDirName+"/"+m2tsFile)
-		fmt.Println(cmd.String())
+		outputFilePath := filepath.Join(outputDirPath, m2tsFile)
+		cmd := exec.Command("ffmpeg", "-i", m2tsFile, "-c", "copy", outputFilePath)
+
+		// ffmpegコマンドを実行して出力を取得
 		out, err := cmd.Output()
 		if err != nil {
 			fmt.Printf("Error processing file %s: %v\n", m2tsFile, err)
 			fmt.Printf("Output:\n%s\n", string(out))
 		} else {
-			fmt.Printf("Successfully processed file: %s\n", m2tsFile)
+			fmt.Printf("Successfully processed file: %s -> %s\n", m2tsFile, outputFilePath)
 		}
 	}
 
