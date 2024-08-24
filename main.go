@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -44,11 +45,19 @@ func main() {
 
 	// 各.m2tsファイルに対してffmpegコマンドを実行
 	for _, m2tsFile := range m2tsFiles {
-		err := exec.Command("ffmpeg", "-i", m2tsFile, "-c", "copy", OutputDirName+"/"+m2tsFile).Run()
+		fmt.Println(m2tsFile)
+		cmd := exec.Command("ffmpeg", "-i", m2tsFile, "-c", "copy", OutputDirName+"/"+m2tsFile)
+		fmt.Println(cmd.String())
+		out, err := cmd.Output()
 		if err != nil {
 			fmt.Printf("Error processing file %s: %v\n", m2tsFile, err)
+			fmt.Printf("Output:\n%s\n", string(out))
 		} else {
 			fmt.Printf("Successfully processed file: %s\n", m2tsFile)
 		}
 	}
+
+	// 終了前にユーザーにキー入力を待つ
+	fmt.Println("Enterキーを押してください...")
+	_, _ = bufio.NewReader(os.Stdin).ReadBytes('\n')
 }
